@@ -1,0 +1,154 @@
+{
+  "name": "MarketPulse AI - Daily Financial Brief",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://open.er-api.com/v6/latest/USD",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        -144,
+        -16
+      ],
+      "id": "7760e345-55fc-46c5-8167-72e3afd0befd",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the latest live exchange rate data for today based on 1 USD:\n{{ $json.rates }}\n\nPlease write a concise 3-sentence executive financial market update highlighting the USD rates against EUR, GBP, JPY, and AUD. Keep the tone professional.",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "b48e3fa7-4dd9-4e55-becb-d6b0ad13b996",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        192
+      ],
+      "id": "90a7d892-a4b3-4e09-ade9-ffba93f16a33",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "3mUH2rg2qagvUKGz",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "6455356202",
+        "text": "=📊 Daily Market Update by FinBrief AI:  {{ $json.text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "f907c576-094e-42ce-bc47-174adf0d6697",
+      "name": "Send a text message",
+      "webhookId": "32538156-0337-431a-8566-b2ff226dc6ad",
+      "credentials": {
+        "telegramApi": {
+          "id": "MbiCCQOQny3xLI4L",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "30821819-637e-4a98-9b19-b3042b2f2bd3",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6e61d25e-a135-4703-a0e4-5119176de0cd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "39f6cd75e5ea5ed62c1343510f5c0a2f92e1be10db60759036706197867d1680"
+  },
+  "nodeGroups": [],
+  "id": "9QDsMgGT1gYEXVxV",
+  "tags": []
+}
